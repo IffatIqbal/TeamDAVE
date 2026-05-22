@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DAVE Hospital Return Predictor</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <div class="brand">DAVE</div>
+        <div class="subtitle">Hospital return risk support</div>
+      </div>
+      <nav>
+        <a class="active" href="index.html">Predictor</a>
+        <a href="models.html">Model Versions</a>
+      </nav>
+    </header>
+
+    <main class="shell">
+      <section class="panel intro">
+        <div>
+          <h1>Predict future hospital revisit risk</h1>
+          <p>
+            Enter the patient’s available screening parameters. The DAVE model estimates whether the patient is likely
+            to return for ED or inpatient care.
+          </p>
+        </div>
+        <div class="status-pill">Local browser scoring</div>
+      </section>
+
+      <section class="workspace">
+        <form id="predict-form" class="panel form-panel">
+          <div class="section-heading">
+            <h2>Patient Context</h2>
+          </div>
+
+          <div class="grid two">
+            <label>
+              Age
+              <input name="Age" type="number" min="0" max="120" value="72" />
+            </label>
+            <label>
+              Cohort
+              <select name="cohort_flag">
+                <option value="hf_flag">Heart failure</option>
+                <option value="ckd_flag">CKD</option>
+                <option value="cancer_flag">Cancer</option>
+                <option value="Multiple_Cohort">Multiple cohort</option>
+              </select>
+            </label>
+            <label>
+              Sex
+              <select name="sex">
+                <option>Female</option>
+                <option>Male</option>
+              </select>
+            </label>
+            <label>
+              Race / Ethnicity
+              <select name="DerivedRaceEthnicity">
+                <option>White / Caucasian</option>
+                <option>Asian</option>
+                <option>Black or African American</option>
+                <option>Latinx / Hispanic</option>
+                <option>Other</option>
+                <option>Unknown / Declined</option>
+              </select>
+            </label>
+            <label>
+              Language
+              <select name="Language_Group">
+                <option>English</option>
+                <option>Other</option>
+              </select>
+            </label>
+            <label>
+              Distance to hospital, miles
+              <input name="straight_line_distance_miles" type="number" step="0.1" value="10" />
+            </label>
+          </div>
+
+          <div class="section-heading">
+            <h2>Ambulatory Engagement</h2>
+          </div>
+          <div class="grid two">
+            <label>
+              Office visits, last 12 months
+              <input name="last_12months_officevisit_count" type="number" min="0" value="4" />
+            </label>
+            <label>
+              Distinct specialties, last 12 months
+              <input name="last_12months_officevisit_distinct_specialty" type="number" min="0" value="2" />
+            </label>
+          </div>
+          <div class="check-row">
+            <label><input name="Specialty_internal_medicine" type="checkbox" /> Internal medicine</label>
+            <label><input name="Specialty_nephrology" type="checkbox" /> Nephrology</label>
+            <label><input name="Specialty_cardiology" type="checkbox" /> Cardiology</label>
+          </div>
+
+          <div class="section-heading">
+            <h2>Chronic Conditions</h2>
+          </div>
+          <div class="check-row">
+            <label><input name="cms_ccw_heart_failure_36" type="checkbox" checked /> Heart failure</label>
+            <label><input name="cms_ccw_chronic_kidney_disease_36" type="checkbox" /> CKD</label>
+            <label><input name="cms_ccw_diabetes_36" type="checkbox" /> Diabetes</label>
+            <label><input name="cms_ccw_hypertension_36" type="checkbox" checked /> Hypertension</label>
+            <label><input name="cms_ccw_ischemic_heart_disease_36" type="checkbox" /> Ischemic heart disease</label>
+            <label><input name="cms_ccw_liver_disease_cirrhosis_and_other_liver_conditions_36" type="checkbox" /> Liver disease</label>
+            <label><input name="cms_ccw_anemia_36" type="checkbox" /> Anemia</label>
+          </div>
+
+          <div class="section-heading">
+            <h2>Target Labs</h2>
+          </div>
+          <div class="grid three">
+            <label>
+              Latest hemoglobin
+              <input name="latest_hemoglobin_24months" type="number" step="0.1" placeholder="optional" />
+            </label>
+            <label>
+              Latest A1C
+              <input name="latest_HbA1c_24months" type="number" step="0.1" placeholder="optional" />
+            </label>
+            <label>
+              Latest AST
+              <input name="latest_AST_24months" type="number" step="0.1" placeholder="optional" />
+            </label>
+            <label>
+              Latest ALT
+              <input name="latest_ALT_24months" type="number" step="0.1" placeholder="optional" />
+            </label>
+            <label>
+              A1C test count
+              <input name="count_HbA1c_24months" type="number" min="0" value="1" />
+            </label>
+            <label>
+              Hemoglobin test count
+              <input name="count_hemoglobin_24months" type="number" min="0" value="1" />
+            </label>
+          </div>
+
+          <button class="primary" type="submit">Run DAVE Prediction</button>
+        </form>
+
+        <aside class="panel result-panel" aria-live="polite">
+          <div class="result-kicker">Prediction</div>
+          <div id="risk-badge" class="risk-badge muted">Not run</div>
+          <h2 id="result-title">Awaiting patient inputs</h2>
+          <p id="result-copy">Run the model to estimate whether this patient is likely to revisit for hospital care.</p>
+
+          <div class="score-box">
+            <span>Risk probability</span>
+            <strong id="probability">--</strong>
+          </div>
+
+          <div class="score-box">
+            <span>Predicted outcome</span>
+            <strong id="predicted-outcome">--</strong>
+          </div>
+
+          <div class="reason-list">
+            <h3>Entered signals</h3>
+            <ul id="signal-list"></ul>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <script src="model-data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

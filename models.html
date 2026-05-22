@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DAVE Model Versions</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <div class="brand">DAVE</div>
+        <div class="subtitle">Model version review</div>
+      </div>
+      <nav>
+        <a href="index.html">Predictor</a>
+        <a class="active" href="models.html">Model Versions</a>
+      </nav>
+    </header>
+
+    <main class="shell">
+      <section class="panel intro">
+        <div>
+          <h1>V1, V2, and V3 comparison</h1>
+          <p>
+            Each attached notebook represents a different patient/control classifier design. V3 is highlighted because
+            it is the most defensible model for presentation and testing.
+          </p>
+        </div>
+        <div class="status-pill success">V3 recommended</div>
+      </section>
+
+      <section class="version-grid">
+        <article class="panel model-card">
+          <div class="card-top">
+            <span class="version-tag">V1</span>
+            <span class="fit-tag underfit">Underfitted</span>
+          </div>
+          <h2>Individual-Level Baseline</h2>
+          <p>
+            Uses one row per person with an 80/10/10 split. It is simple and leakage-aware, but only has 10 individual
+            examples, so it does not have enough training signal.
+          </p>
+          <dl>
+            <div><dt>Notebook</dt><dd>patient_classifier_colab.ipynb</dd></div>
+            <div><dt>Strength</dt><dd>Clean baseline</dd></div>
+            <div><dt>Weakness</dt><dd>Too few rows to learn stable patterns</dd></div>
+          </dl>
+        </article>
+
+        <article class="panel model-card">
+          <div class="card-top">
+            <span class="version-tag">V2</span>
+            <span class="fit-tag overfit">Overfitted</span>
+          </div>
+          <h2>Session-Level Exploratory Model</h2>
+          <p>
+            Uses session-level rows and leave-one-subject-out evaluation. It reports stronger performance, but is more
+            aggressive and likely too tuned to the small workbook.
+          </p>
+          <dl>
+            <div><dt>Notebook</dt><dd>patient_classifier_colabV2.ipynb</dd></div>
+            <div><dt>Strength</dt><dd>Uses more rows</dd></div>
+            <div><dt>Weakness</dt><dd>Exploratory and overfit-prone</dd></div>
+          </dl>
+        </article>
+
+        <article class="panel model-card recommended">
+          <div class="card-top">
+            <span class="version-tag">V3</span>
+            <span class="fit-tag best">Most accurate</span>
+          </div>
+          <h2>Conservative Locked Model</h2>
+          <p>
+            Uses session-level features, leave-one-subject-out testing, non-distributional metrics, feature selection,
+            and a locked regularized logistic model. This is the best version to present.
+          </p>
+          <dl>
+            <div><dt>Notebook</dt><dd>patient_classifier_colabV3.ipynb</dd></div>
+            <div><dt>Reported target</dt><dd>~80% balanced accuracy</dd></div>
+            <div><dt>Why it wins</dt><dd>Best balance of performance and restraint</dd></div>
+          </dl>
+        </article>
+      </section>
+
+      <section class="panel decision-panel">
+        <h2>Recommendation</h2>
+        <p>
+          Use <strong>V3</strong> for the final workflow. Keep V1 as the baseline and V2 as an exploratory comparison,
+          but avoid presenting V2 as the primary model because its higher performance may not generalize.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
